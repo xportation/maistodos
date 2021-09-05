@@ -1,0 +1,45 @@
+name: MaisTodos
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+      - name: Run tests and generate coverage report
+        run: |
+          mkdir -p .reports
+          coverage run -m pytest
+          coverage report -m
+          coverage xml
+          coverage html
+      - name: Archive code coverage html report
+        uses: actions/upload-artifact@v2
+        with:
+          name: code-coverage-report
+          path: .reports/coverage
+      - name: Run code quality reports
+        run: |
+          mkdir -p .reports
+          flake8 --format=html --htmldir=.reports/flake8 --exit-zero
+          flake8
+      - name: Archive code quality html report
+        uses: actions/upload-artifact@v2
+        with:
+          name: code-quality-report
+          path: .reports/flake8
