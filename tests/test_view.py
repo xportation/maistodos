@@ -9,12 +9,6 @@ def client():
     return TestClient(application.create_app())
 
 
-def test_index(client):
-    response = client.get('/')
-    assert response.status_code == 200
-    assert response.json() == {'Hello': 'World'}
-
-
 def test_add_cashback_empty_body(client):
     response = client.post('/api/cashback')
     assert response.status_code == 422
