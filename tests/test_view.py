@@ -18,15 +18,15 @@ def test_add_cashback(client):
     sample_order_data = {
         'sold_at': '2026-01-02 00:00:00',
         'customer': {
-           'document': '00000000000',
+           'social_number': '00000000000',
            'name': 'JOSE DA SILVA',
         },
-        'total': '90.00',
+        'total_amount': '90.00',
         'products': [
            {
               'type': 'B',
-              'value': '10.00',
-              'qty': 9,
+              'amount': '10.00',
+              'quantity': 9,
            }
         ],
     }
