@@ -65,6 +65,18 @@ def test_product_total_amount():
     assert product.total_amount() == pytest.approx(12.3)
 
 
+def test_product_total_amount_is_zero_if_not_quantity_or_amount():
+    product = models.Product()
+    assert product.total_amount() == pytest.approx(0)
+
+    product.quantity = 3
+    assert product.total_amount() == pytest.approx(0)
+
+    product.quantity = 0
+    product.amount = 4.10
+    assert product.total_amount() == pytest.approx(0)
+
+
 def build_product(amount, quantity):
     product = models.Product()
     product.amount = amount
@@ -79,3 +91,9 @@ def test_order_must_validate_wrong_total_amount():
     order.total_amount = 138.25
     with pytest.raises(AssertionError, match='Invalid Total Amount'):
         order.total_amount = 138.26
+
+
+def test_order_total_amount_is_zero_when_none():
+    order = models.Order()
+    order.total_amount = None
+    assert order.total_amount == pytest.approx(0)

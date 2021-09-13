@@ -7,6 +7,8 @@ from sqlalchemy.orm import declarative_base, validates, relationship
 
 Base = declarative_base()
 
+compare_approx = 0.00001
+
 
 class Order(Base):
     __tablename__ = 'order'
@@ -14,13 +16,16 @@ class Order(Base):
     id = Column(Integer, primary_key=True, default=lambda: str(uuid.uuid4()))
     sold_at = Column(DateTime)
     total_amount = Column(Numeric(scale=2), nullable=False)
-    customer = relationship('Customer', backref='order', cascade='all,delete')
+    customer = relationship('Customer', backref='order', cascade='all,delete', uselist=False)
     products = relationship('Product', backref='order', cascade='all,delete')
 
     @validates('total_amount')
     def validate_total_amount(self, _, total_amount):
+        if not total_amount:
+            total_amount = 0.0
+
         total = sum([p.total_amount() for p in self.products])
-        assert total_amount == total, 'Invalid Total Amount.'
+        assert (total_amount - total) < compare_approx, 'Invalid Total Amount'
         return total_amount
 
 
@@ -72,4 +77,6 @@ class Product(Base):
         return quantity
 
     def total_amount(self):
+        if not self.quantity or not self.amount:
+            return 0
         return self.quantity * self.amount
