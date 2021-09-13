@@ -24,5 +24,17 @@ class CashbackStorage:
             raise CashbackAddException('Fail sending cashback')
         return resp.json()
 
-    def delete(self, cashback_id):
+    @staticmethod
+    def delete(cashback_id):
         return cashback_id
+
+
+class OrderStorage:
+    def __init__(self, db):
+        self.db = db
+
+    def add(self, order):
+        with self.db.new_session() as session:
+            session.add(order)
+            session.commit()
+            return order

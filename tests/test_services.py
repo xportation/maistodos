@@ -1,7 +1,6 @@
 from unittest import mock
 
 import pytest
-import responses
 
 from cashback import services, models, storages
 
@@ -39,8 +38,7 @@ def test_cashback_percentage_for_all_product_types():
     assert_cashback_percentage(products_c, 1.35738)
 
 
-def test_cashback_service_load_order_should_stops_on_model_validations():
-    cashback_service = services.CashbackService(None, None)
+def test_cashback_service_load_order_should_stops_on_model_validations(cashback_service):
     data = [
         {'total_amount': 10},
         {'products': [{'type': 'E'}]},
@@ -51,6 +49,10 @@ def test_cashback_service_load_order_should_stops_on_model_validations():
     for cashback_data in data:
         with pytest.raises(AssertionError):
             _ = cashback_service.load_order(cashback_data)
+
+
+def test_cashback_service_load_order_success(cashback_service, order_sample_data):
+    assert cashback_service.load_order(order_sample_data)
 
 
 def test_cashback_service_should_stops_if_cashback_storage_fails():
@@ -84,24 +86,3 @@ def test_cashback_service_should_return_the_cashback(cashback_sample_data):
     cashback = cashback_service.create_cashback({'total_amount': 0.0})
     assert cashback.get('id') == '7'
     assert cashback.get('cashback') == '12'
-
-
-def test_cashback_storage_should_throw_when_add_fails():
-    with responses.RequestsMock() as mock_requests:
-        mock_requests.add(responses.POST, 'http://tmp.com/api/mock/Cashback', status=404)
-        with pytest.raises(storages.CashbackAddException):
-            cashback_storage = storages.CashbackStorage('http://tmp.com')
-            _ = cashback_storage.add({})
-
-
-def test_cashback_storage_add_successful(cashback_sample_data):
-    with responses.RequestsMock() as mock_requests:
-        mock_requests.add(responses.POST, 'http://tmp.com/api/mock/Cashback', json=cashback_sample_data, status=201)
-        cashback_storage = storages.CashbackStorage('http://tmp.com')
-        cashback = cashback_storage.add({})
-        assert cashback
-
-
-def test_cashback_storage_delete():
-    cashback_storage = storages.CashbackStorage('http://tmp.com')
-    assert cashback_storage.delete(2)

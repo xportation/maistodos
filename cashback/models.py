@@ -13,11 +13,23 @@ compare_approx = 0.00001
 class Order(Base):
     __tablename__ = 'order'
 
-    id = Column(Integer, primary_key=True, default=lambda: str(uuid.uuid4()))
-    sold_at = Column(DateTime)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    cashback_id = Column(Integer, nullable=False)
+    sold_at = Column(DateTime, nullable=False)
     total_amount = Column(Numeric(scale=2), nullable=False)
-    customer = relationship('Customer', backref='order', cascade='all,delete', uselist=False)
-    products = relationship('Product', backref='order', cascade='all,delete')
+    customer = relationship(
+        'Customer',
+        back_populates='order',
+        cascade='all, delete',
+        passive_deletes=True,
+        uselist=False
+    )
+    products = relationship(
+        'Product',
+        back_populates='order',
+        cascade='all, delete',
+        passive_deletes=True
+    )
 
     @validates('total_amount')
     def validate_total_amount(self, _, total_amount):
@@ -32,10 +44,11 @@ class Order(Base):
 class Customer(Base):
     __tablename__ = 'customer'
 
-    id = Column(Integer, primary_key=True, default=lambda: str(uuid.uuid4()))
-    order_id = Column(String(36), ForeignKey('order.id'), nullable=False)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    order_id = Column(String(36), ForeignKey('order.id', ondelete='cascade'), nullable=False)
     name = Column(String, nullable=False)
     social_number = Column(String, nullable=False)
+    order = relationship('Order', back_populates='customer', uselist=False)
 
     @validates('social_number')
     def validate_social_number(self, _, social_number):
@@ -59,11 +72,12 @@ class ProductType:
 class Product(Base):
     __tablename__ = 'product'
 
-    id = Column(Integer, primary_key=True, default=lambda: str(uuid.uuid4()))
-    order_id = Column(String(36), ForeignKey('order.id'), nullable=False)
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    order_id = Column(String(36), ForeignKey('order.id', ondelete='cascade'), nullable=False)
     type = Column(String, nullable=False)
     amount = Column(Numeric(scale=2), nullable=False)
     quantity = Column(Integer, nullable=False)
+    order = relationship('Order', back_populates='products')
 
     @validates('type')
     def validate_type(self, _, product_type):

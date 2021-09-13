@@ -11,7 +11,8 @@ class CashbackService:
         cashback_amount = self.calculate_cashback(order.products)
         cashback = self.cashback_storage.add(order.customer.social_number, cashback_amount)
         try:
-            self.order_storage.add(order, cashback)
+            order.cashback_id = cashback.get('id')
+            self.order_storage.add(order)
             return cashback
         except storages.OrderAddException:
             self.cashback_storage.delete(cashback.id)
