@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+import responses
 
 from cashback import services, models, storages
 
@@ -83,3 +84,24 @@ def test_cashback_service_should_return_the_cashback(cashback_sample_data):
     cashback = cashback_service.create_cashback({'total_amount': 0.0})
     assert cashback.get('id') == '7'
     assert cashback.get('cashback') == '12'
+
+
+def test_cashback_storage_should_throw_when_add_fails():
+    with responses.RequestsMock() as mock_requests:
+        mock_requests.add(responses.POST, 'http://tmp.com/api/mock/Cashback', status=404)
+        with pytest.raises(storages.CashbackAddException):
+            cashback_storage = storages.CashbackStorage('http://tmp.com')
+            _ = cashback_storage.add({})
+
+
+def test_cashback_storage_add_successful(cashback_sample_data):
+    with responses.RequestsMock() as mock_requests:
+        mock_requests.add(responses.POST, 'http://tmp.com/api/mock/Cashback', json=cashback_sample_data, status=201)
+        cashback_storage = storages.CashbackStorage('http://tmp.com')
+        cashback = cashback_storage.add({})
+        assert cashback
+
+
+def test_cashback_storage_delete():
+    cashback_storage = storages.CashbackStorage('http://tmp.com')
+    assert cashback_storage.delete(2)

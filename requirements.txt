@@ -3,5 +3,6 @@ fastapi==0.68.1
 dependency-injector==4.36.0
 sqlalchemy==1.4.23
 validate-docbr==1.8.2
+requests==2.26.0
 uvicorn==0.15.0
 autopep8==1.5.7
