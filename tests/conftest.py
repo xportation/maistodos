@@ -17,10 +17,10 @@ def cashback_sample_data():
     }
 
 
-@pytest.fixture
-def order_sample_data():
+def build_order_sample(is_raw_mode):
+    sold_at = '2021-01-01 00:00:00' if is_raw_mode else datetime.datetime.utcnow()
     return {
-        'sold_at': datetime.datetime.utcnow(),
+        'sold_at': sold_at,
         'total_amount': 46.98,
         'customer': {
             'name': 'Feliciano Santos',
@@ -31,6 +31,16 @@ def order_sample_data():
             {'type': 'B', 'amount': 6.25, 'quantity': 4}
         ]
     }
+
+
+@pytest.fixture
+def order_sample_data():
+    return build_order_sample(False)
+
+
+@pytest.fixture
+def order_sample_dict():
+    return build_order_sample(True)
 
 
 @pytest.fixture

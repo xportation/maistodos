@@ -17,9 +17,9 @@ class CashbackStorage:
     def __init__(self, cashback_url):
         self.cashback_url = cashback_url
 
-    def add(self, cashback):
+    def add(self, social_number, amount):
         url = urllib.parse.urljoin(self.cashback_url, 'api/mock/Cashback')
-        resp = requests.post(url, json=cashback)
+        resp = requests.post(url, json=dict(document=social_number, cashback=amount))
         if not resp.ok:
             raise CashbackAddException('Fail sending cashback')
         return resp.json()

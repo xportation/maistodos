@@ -10,14 +10,14 @@ def test_cashback_storage_should_throw_when_add_fails():
         mock_requests.add(responses.POST, 'http://tmp.com/api/mock/Cashback', status=404)
         with pytest.raises(storages.CashbackAddException):
             cashback_storage = storages.CashbackStorage('http://tmp.com')
-            _ = cashback_storage.add({})
+            _ = cashback_storage.add('', 0)
 
 
 def test_cashback_storage_add_successful(cashback_sample_data):
     with responses.RequestsMock() as mock_requests:
         mock_requests.add(responses.POST, 'http://tmp.com/api/mock/Cashback', json=cashback_sample_data, status=201)
         cashback_storage = storages.CashbackStorage('http://tmp.com')
-        cashback = cashback_storage.add({})
+        cashback = cashback_storage.add('', 0)
         assert cashback
 
 

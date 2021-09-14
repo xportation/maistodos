@@ -11,10 +11,10 @@ class Container(containers.DeclarativeContainer):
 
     cashback_storage = providers.Singleton(storages.CashbackStorage, cashback_url=config.cashback_url())
 
-    order_storage = providers.Factory(services.CashbackService, db=db)
+    order_storage = providers.Factory(storages.OrderStorage, db=db)
 
     cashback_service = providers.Factory(
         services.CashbackService,
-        cashback_storage=db,
-        order_storage=db
+        cashback_storage=cashback_storage,
+        order_storage=order_storage
     )

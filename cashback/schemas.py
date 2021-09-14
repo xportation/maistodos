@@ -11,12 +11,20 @@ class Customer(pydantic.BaseModel):
 
 class Product(pydantic.BaseModel):
     type: str
-    amount: str
+    amount: float
     quantity: int
 
 
 class Order(pydantic.BaseModel):
     sold_at: datetime.datetime
     customer: Customer
-    total_amount: str
+    total_amount: float
     products: List[Product] = []
+
+
+class Cashback(pydantic.BaseModel):
+    createdAt: datetime.datetime
+    message: str
+    id: str
+    document: str
+    cashback: str

@@ -1,12 +1,17 @@
+from unittest import mock
+
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.exc import IntegrityError
 
 from cashback import application
+
+app = application.create_app()
 
 
 @pytest.fixture
 def client():
-    return TestClient(application.create_app())
+    return TestClient(app)
 
 
 def test_add_cashback_empty_body(client):
@@ -14,21 +19,15 @@ def test_add_cashback_empty_body(client):
     assert response.status_code == 422
 
 
-def test_add_cashback(client):
-    sample_order_data = {
-        'sold_at': '2026-01-02 00:00:00',
-        'customer': {
-           'social_number': '00000000000',
-           'name': 'JOSE DA SILVA',
-        },
-        'total_amount': '90.00',
-        'products': [
-           {
-              'type': 'B',
-              'amount': '10.00',
-              'quantity': 9,
-           }
-        ],
-    }
-    response = client.post('/api/cashback', json=sample_order_data)
+def test_add_cashback(client, order_sample_dict):
+    response = client.post('/api/cashback', json=order_sample_dict)
     assert response.status_code == 201
+
+
+def test_database_error_return_status_400(client, order_sample_dict):
+    mock_order_storage = mock.MagicMock()
+    mock_order_storage.add.side_effect = IntegrityError('', '', '', '')
+
+    with app.container.order_storage.override(mock_order_storage):
+        response = client.post('/api/cashback', json=order_sample_dict)
+        assert response.status_code == 400

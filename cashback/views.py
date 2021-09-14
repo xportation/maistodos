@@ -1,11 +1,16 @@
+from dependency_injector.wiring import inject, Provide
+from fastapi import APIRouter, Depends
 
-from fastapi import APIRouter
-
-from cashback import schemas
+from cashback import schemas, services
+from cashback.di import Container
 
 router = APIRouter()
 
 
-@router.post('/api/cashback', response_model=schemas.Order, status_code=201)
-async def add_cashback(order: schemas.Order):
-    return order
+@router.post('/api/cashback', response_model=schemas.Cashback, status_code=201)
+@inject
+async def add_cashback(
+        order: schemas.Order,
+        cashback_service: services.CashbackService = Depends(Provide[Container.cashback_service])
+):
+    return cashback_service.create_cashback(order.dict())
