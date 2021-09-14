@@ -19,9 +19,10 @@ def test_add_cashback_empty_body(client):
     assert response.status_code == 422
 
 
-def test_add_cashback(client, order_sample_dict):
-    response = client.post('/api/cashback', json=order_sample_dict)
-    assert response.status_code == 201
+def test_add_cashback(client, order_sample_dict, db_factory):
+    with app.container.db.override(db_factory):
+        response = client.post('/api/cashback', json=order_sample_dict)
+        assert response.status_code == 201
 
 
 def test_database_error_return_status_400(client, order_sample_dict):
